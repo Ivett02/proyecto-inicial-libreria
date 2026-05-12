@@ -1,3 +1,5 @@
+actúa como un creador de software, quiero crear una aplicación multiplataforma en flutter dart y firebase utilizando vs code o Antigravity, que herramientas se requieren, ui, ux, dependencias, login authenticacion usuario password, base de datos firestore, privider, dependencias en pubspec.yaml, antes de que proporciones el codigo, quiero crear un plan de implementación en formato markdown, para desarrollar la aplicación "Libreria: Tinta & Hojas" , no código, procedimiento paso a paso para el desarrollo
+
 # 📘 Plan de Implementación: "Librería: Tinta & Hojas"
 > *Nota preliminar:* "Antigravity" no corresponde a un IDE oficial para Flutter. Se recomienda **VS Code** como entorno principal, complementado con las extensiones oficiales de Flutter/Dart y Firebase. El plan está estructurado para ser **multiplataforma** (Android, iOS, Web, Windows/macOS/Linux si se desea).
 
