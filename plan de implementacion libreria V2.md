@@ -12,26 +12,26 @@
 
 # 🏗️ 1. Arquitectura y Estructura de Carpetas (Feature-First)
 
-```plaintext
+```plaintext id="rxnqco"
 lib/
-├── core/
-│   ├── config/          # Configuración dev/staging, constantes, rutas
-│   ├── theme/           # ThemeData, paleta vino/beige, tipografías
-│   ├── utils/           # Validadores, helpers, formatos de fecha/precio
-│   └── services/        # Firebase init, Storage service
-├── features/
-│   ├── auth/            # Login, registro, recuperación, roles
-│   ├── books/           # Libros, géneros, autores, búsqueda y filtros
-│   ├── cart/            # Carrito, persistencia y cálculo de totales
-│   ├── checkout/        # Pedido, dirección, resumen y confirmación
-│   ├── admin/           # CRUD libros, inventario, categorías, pedidos
-│   ├── profile/         # Perfil cliente, historial y favoritos
-│   └── reviews/         # Comentarios y calificaciones
-├── shared/
-│   ├── widgets/         # Botones, cards, inputs, diálogos
-│   ├── models/          # Entidades Dart
-│   └── providers/       # AuthProvider, BookProvider, CartProvider, etc.
-└── main.dart            # Punto de entrada
+├── nucleo/
+│   ├── configuracion/       # Configuración dev/staging, constantes y rutas
+│   ├── tema/                # ThemeData, paleta vino/beige, tipografías
+│   ├── utilidades/          # Validadores, helpers y formatos
+│   └── servicios/           # Firebase init y Storage service
+├── funcionalidades/
+│   ├── autenticacion/       # Login, registro y recuperación
+│   ├── libros/              # Catálogo, filtros, búsqueda y detalles
+│   ├── carrito/             # Gestión del carrito y totales
+│   ├── confirmacion_compra/ # Checkout y pedidos
+│   ├── administracion/      # CRUD administrativo
+│   ├── perfil/              # Perfil e historial
+│   └── resenas/             # Comentarios y calificaciones
+├── compartido/
+│   ├── componentes/         # Botones, cards, inputs y diálogos
+│   ├── modelos/             # Entidades Dart
+│   └── proveedores_estado/  # Providers globales
+└── main.dart
 
 assets/
 ├── fonts/
@@ -43,44 +43,48 @@ assets/
 
 # 📚 2. Mapeo Relacional → Firestore (NoSQL)
 
-| Entidad SQL      | Adaptación Firestore                    | Estrategia                              |
-| ---------------- | --------------------------------------- | --------------------------------------- |
-| `libro`          | Colección `books`                       | Documento principal con datos del libro |
-| `categoria`      | Colección `categories`                  | Géneros y categorías literarias         |
-| `autor`          | Colección `authors`                     | Información del autor                   |
-| `editorial`      | Colección `publishers`                  | Editoriales de libros                   |
-| `inventario`     | Campo `stock` dentro de `books`         | Actualización atómica                   |
-| `cliente`        | Colección `users`                       | Vinculada a Firebase Auth               |
-| `pedido`         | Colección `orders`                      | Detalles embebidos                      |
-| `detalle_pedido` | Array `items` dentro de `orders`        | Historial inmutable                     |
-| `favoritos`      | Subcolección `users/{uid}/favorites`    | Libros favoritos                        |
-| `reseñas`        | Subcolección `books/{id}/reviews`       | Comentarios y puntuaciones              |
-| `carrito`        | Persistencia local + Firestore opcional | Sincronización por usuario              |
+| Entidad SQL       | Adaptación Firestore       | Estrategia                      |
+| ----------------- | -------------------------- | ------------------------------- |
+| `IDIOMA`          | Colección `idiomas`        | Catálogo de idiomas disponibles |
+| `EDITORIAL`       | Colección `editoriales`    | Empresas editoriales            |
+| `AUTOR`           | Colección `autores`        | Información de autores          |
+| `CATEGORIA`       | Colección `categorias`     | Géneros y categorías            |
+| `LIBRO`           | Colección `libros`         | Entidad principal               |
+| `LIBRO_AUTOR`     | Array `autorIds`           | Relación muchos a muchos        |
+| `LIBRO_CATEGORIA` | Array `categoriaIds`       | Relación muchos a muchos        |
+| `CLIENTE`         | Colección `usuarios`       | Clientes registrados            |
+| `USUARIO`         | Firebase Auth + `usuarios` | Control de acceso               |
+| `PEDIDO`          | Colección `pedidos`        | Historial de compras            |
+| `DETALLE_PEDIDO`  | Array `detalles`           | Libros incluidos                |
+| `PAGO`            | Campo embebido `pago`      | Información de pago             |
+| `PROVEEDOR`       | Colección `proveedores`    | Distribuidores                  |
+| `COMPRA`          | Colección `compras`        | Reabastecimiento                |
+| `DETALLE_COMPRA`  | Array `detallesCompra`     | Productos comprados             |
 
 ---
 
 # 🔐 3. Autenticación y Control de Acceso (RBAC)
 
-| Paso | Acción                                 | Entregable        |
-| ---- | -------------------------------------- | ----------------- |
-| 3.1  | Registro/Login con Firebase Auth       | Flujo funcional   |
-| 3.2  | Roles `admin` y `user` mediante claims | Control de acceso |
-| 3.3  | Protección de rutas con `go_router`    | Navegación segura |
-| 3.4  | Reglas Firestore                       | Seguridad por rol |
-| 3.5  | Persistencia de sesión                 | Sesión estable    |
+| Paso | Acción                              | Entregable        |
+| ---- | ----------------------------------- | ----------------- |
+| 3.1  | Registro/Login con Firebase Auth    | Flujo funcional   |
+| 3.2  | Roles `admin` y `cliente`           | Claims y permisos |
+| 3.3  | Protección de rutas con `go_router` | Navegación segura |
+| 3.4  | Reglas Firestore                    | Seguridad por rol |
+| 3.5  | Persistencia de sesión              | Login persistente |
 
 ---
 
 # 📊 4. Gestión de Estado con Provider
 
-| Provider           | Responsabilidad                  |
-| ------------------ | -------------------------------- |
-| `AuthProvider`     | Login, registro, perfil y logout |
-| `BookProvider`     | Libros, búsqueda, filtros        |
-| `CartProvider`     | Carrito y totales                |
-| `CheckoutProvider` | Pedidos y confirmaciones         |
-| `AdminProvider`    | CRUD administrativo              |
-| `ThemeProvider`    | Tema vino/beige y modo oscuro    |
+| Provider          | Responsabilidad                  |
+| ----------------- | -------------------------------- |
+| `AuthProvider`    | Login, registro, perfil y logout |
+| `LibroProvider`   | Catálogo, filtros y búsqueda     |
+| `CarritoProvider` | Carrito y cálculos               |
+| `PedidoProvider`  | Confirmación y pedidos           |
+| `AdminProvider`   | CRUD administrativo              |
+| `TemaProvider`    | Tema visual y modo oscuro        |
 
 > Patrón recomendado: `ResultState<T>` → `idle`, `loading`, `success`, `error`.
 
@@ -92,9 +96,9 @@ assets/
 
 | Nombre        | Hex       | Uso                 |
 | ------------- | --------- | ------------------- |
-| `vinoDark`    | `#5A1E2D` | Header, navegación  |
+| `vinoDark`    | `#5A1E2D` | Header y navegación |
 | `vinoPrimary` | `#7B2D42` | Botones principales |
-| `vinoSoft`    | `#A05C6B` | Hover y acentos     |
+| `vinoSoft`    | `#A05C6B` | Hover y detalles    |
 | `beige`       | `#F5E6D3` | Fondos              |
 | `cream`       | `#FFF9F2` | Tarjetas            |
 | `textDark`    | `#2E2A27` | Texto principal     |
@@ -116,7 +120,7 @@ assets/
 
 ### 📖 Tarjeta de Libro
 
-```plaintext
+```plaintext id="ltdibf"
 ┌─────────────────────┐
 │ [Portada del libro] │
 │                     │
@@ -128,14 +132,6 @@ assets/
 └─────────────────────┘
 ```
 
-### 🛒 Botones
-
-| Tipo       | Estilo                   |
-| ---------- | ------------------------ |
-| Primario   | Fondo vino, texto blanco |
-| Secundario | Beige con borde vino     |
-| Disabled   | Gris claro               |
-
 ---
 
 # 👤 6. Flujos de Usuario
@@ -144,23 +140,23 @@ assets/
 
 1. Registro/Login
 2. Explorar libros
-3. Buscar por género o autor
-4. Ver detalle del libro
+3. Buscar por género, idioma o autor
+4. Ver detalles del libro
 5. Agregar al carrito
-6. Checkout
-7. Historial y favoritos
+6. Confirmar compra
+7. Consultar historial y favoritos
 
 ---
 
 ## Administrador
 
-1. Login admin
+1. Login administrador
 2. CRUD libros
 3. Gestión de inventario
-4. Gestión de categorías/autores
-5. Ver pedidos
-6. Gestionar usuarios
-7. Moderar reseñas
+4. Gestión de categorías y autores
+5. Gestión de editoriales y proveedores
+6. Visualización de pedidos
+7. Moderación de reseñas
 
 ---
 
@@ -175,106 +171,161 @@ assets/
 | Utilidades | `shared_preferences`, `intl`, `uuid`, `equatable`, `formz`              |
 | Testing    | `flutter_test`, `mocktail`, `integration_test`                          |
 
-> ❌ Excluidos: Analytics, Crashlytics y servicios de producción.
+> ❌ Excluidos: Analytics, Crashlytics y herramientas de producción.
 
 ---
 
 # 🧪 8. Pruebas y Validación
 
-| Tipo            | Alcance                        |
-| --------------- | ------------------------------ |
-| Unitarias       | Providers, validadores         |
-| Widget          | Componentes reutilizables      |
-| Integración     | Flujo login → carrito → pedido |
-| Firestore Rules | Seguridad por rol              |
-| Responsive      | Android, Web y Windows         |
+| Tipo            | Alcance                   |
+| --------------- | ------------------------- |
+| Unitarias       | Providers y validadores   |
+| Widget          | Componentes reutilizables |
+| Integración     | Login → carrito → pedido  |
+| Firestore Rules | Seguridad por rol         |
+| Responsive      | Android, Web y Windows    |
 
 ---
 
 # 📅 9. Roadmap de Desarrollo
 
-| Semana | Objetivo                         |
-| ------ | -------------------------------- |
-| 1      | Setup inicial, tema y estructura |
-| 2      | Firebase Auth + roles            |
-| 3      | Catálogo de libros               |
-| 4      | Carrito y checkout               |
-| 5      | Panel administrador              |
-| 6      | Perfil e historial               |
-| 7      | Responsive y optimización        |
-| 8      | Documentación y revisión final   |
+| Semana | Objetivo                   |
+| ------ | -------------------------- |
+| 1      | Setup inicial y estructura |
+| 2      | Firebase Auth y roles      |
+| 3      | Catálogo y filtros         |
+| 4      | Carrito y confirmación     |
+| 5      | Panel administrador        |
+| 6      | Perfil e historial         |
+| 7      | Responsive y optimización  |
+| 8      | Documentación final        |
 
 ---
 
-# 📚 10. Estructura Firestore (Colecciones)
+# 📚 10. Estructura de Colecciones Firestore
 
-## `books`
+## `libros`
 
-| Campo       | Tipo      |
-| ----------- | --------- |
-| title       | string    |
-| description | string    |
-| authorId    | reference |
-| categoryId  | reference |
-| publisherId | reference |
-| price       | number    |
-| stock       | number    |
-| imageUrl    | string    |
-| rating      | number    |
-| isFeatured  | boolean   |
-| createdAt   | timestamp |
+| Campo        | Tipo      |
+| ------------ | --------- |
+| titulo       | string    |
+| descripcion  | string    |
+| autorIds     | array     |
+| categoriaIds | array     |
+| editorialId  | reference |
+| idiomaId     | reference |
+| precio       | number    |
+| stock        | number    |
+| portadaUrl   | string    |
+| calificacion | number    |
+| destacado    | boolean   |
+| createdAt    | timestamp |
 
 ---
 
-## `authors`
+## `autores`
 
 | Campo     | Tipo   |
 | --------- | ------ |
-| name      | string |
-| biography | string |
-| photoUrl  | string |
+| nombre    | string |
+| biografia | string |
+| fotoUrl   | string |
 
 ---
 
-## `categories`
+## `categorias`
 
-| Campo | Tipo   |
-| ----- | ------ |
-| name  | string |
-| icon  | string |
+| Campo  | Tipo   |
+| ------ | ------ |
+| nombre | string |
+| icono  | string |
 
 ---
 
-## `orders`
+## `editoriales`
+
+| Campo    | Tipo   |
+| -------- | ------ |
+| nombre   | string |
+| pais     | string |
+| sitioWeb | string |
+
+---
+
+## `idiomas`
+
+| Campo  | Tipo   |
+| ------ | ------ |
+| nombre | string |
+| codigo | string |
+
+---
+
+## `usuarios`
 
 | Campo     | Tipo      |
 | --------- | --------- |
-| userId    | reference |
-| items     | array     |
+| nombre    | string    |
+| correo    | string    |
+| rol       | string    |
+| telefono  | string    |
+| createdAt | timestamp |
+
+---
+
+## `pedidos`
+
+| Campo     | Tipo      |
+| --------- | --------- |
+| usuarioId | reference |
+| detalles  | array     |
 | subtotal  | number    |
 | total     | number    |
-| status    | string    |
+| estado    | string    |
+| pago      | map       |
 | createdAt | timestamp |
 
 ---
 
-## `reviews`
+## `compras`
+
+| Campo          | Tipo      |
+| -------------- | --------- |
+| proveedorId    | reference |
+| detallesCompra | array     |
+| total          | number    |
+| fecha          | timestamp |
+
+---
+
+## `proveedores`
+
+| Campo     | Tipo   |
+| --------- | ------ |
+| nombre    | string |
+| telefono  | string |
+| correo    | string |
+| direccion | string |
+
+---
+
+## `resenas`
 
 Subcolección:
-`books/{id}/reviews`
+`libros/{id}/resenas`
 
-| Campo     | Tipo      |
-| --------- | --------- |
-| userId    | reference |
-| comment   | string    |
-| rating    | number    |
-| createdAt | timestamp |
+| Campo        | Tipo      |
+| ------------ | --------- |
+| usuarioId    | reference |
+| comentario   | string    |
+| calificacion | number    |
+| createdAt    | timestamp |
 
 ---
 
 # 🖼️ 11. Concepto Visual General
 
-```plaintext
+```plaintext id="xpkcqp"
 ┌─────────────────────────────────┐
 │ 📚 Tinta & Hojas      🛒 👤 🔍 │
 ├─────────────────────────────────┤
@@ -298,7 +349,7 @@ Subcolección:
 # ✅ Checklist de Validación
 
 * [ ] Firestore estructurado correctamente
-* [ ] Roles admin/user definidos
+* [ ] Roles admin/cliente definidos
 * [ ] Providers organizados
 * [ ] Navegación protegida
 * [ ] Tema vino/beige implementado
